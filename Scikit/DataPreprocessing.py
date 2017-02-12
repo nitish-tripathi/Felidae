@@ -12,7 +12,7 @@ def main():
     df_ = pd.read_csv(StringIO(csv_data))
 
     print df_.isnull().sum()
-    print "Nitish Tripathi"
+
     print df_.values
 
 if __name__ == "__main__":

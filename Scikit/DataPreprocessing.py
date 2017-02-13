@@ -22,7 +22,5 @@ def main():
     imputed_data = imr.transform(df_.values)
     print imputed_data
 
-
-
 if __name__ == "__main__":
     main()

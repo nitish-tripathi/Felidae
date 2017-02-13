@@ -10,6 +10,7 @@ AdalineGradientDescent	Perceptron/Adaline.py	/^class AdalineGradientDescent(obje
 AdalineStochasticGradientDescent	Perceptron/Adaline.py	/^class AdalineStochasticGradientDescent(object):$/;"	kind:class	line:78
 DataPreprocessing.py	Scikit/DataPreprocessing.py	1;"	kind:file	line:1
 Generate2dData	Perceptron/Perceptron.py	/^class Generate2dData(object):$/;"	kind:class	line:4
+Imputer	Scikit/DataPreprocessing.py	/^from sklearn.preprocessing import Imputer$/;"	kind:namespace	line:4
 Iris.py	Perceptron/Iris.py	1;"	kind:file	line:1
 KNN-scikit.py	Scikit/KNN-scikit.py	1;"	kind:file	line:1
 KNeighborsClassifier	Scikit/KNN-scikit.py	/^from sklearn.neighbors import KNeighborsClassifier$/;"	kind:namespace	line:7
@@ -80,7 +81,7 @@ main	Kaggle/Datasets/Glass_Classification/Kernel.py	/^def main():$/;"	kind:funct
 main	Kaggle/Datasets/Zoo/Zoo.py	/^def main():$/;"	kind:function	line:37
 main	Perceptron/Iris.py	/^def main():$/;"	kind:function	line:34
 main	Perceptron/LogisticRegressionTest.py	/^def main():$/;"	kind:function	line:34
-main	Scikit/DataPreprocessing.py	/^def main():$/;"	kind:function	line:5
+main	Scikit/DataPreprocessing.py	/^def main():$/;"	kind:function	line:6
 main	Scikit/KNN-scikit.py	/^def main():$/;"	kind:function	line:37
 main	Scikit/Logistic-Regression-scikit.py	/^def main():$/;"	kind:function	line:35
 main	Scikit/Perceptron-scikit.py	/^def main():$/;"	kind:function	line:35

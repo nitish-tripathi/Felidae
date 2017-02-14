@@ -1,33 +1,6 @@
 
 import numpy as np
 
-class Generate2dData(object):
-    """ Class to generate demo 2d data"""
-
-    def __init__(self, number_of_samples):
-        """ Initializer """
-        self.number_of_samples = number_of_samples
-
-    def generate(self):
-        """
-        generates a 2D linearly separable dataset with n samples.
-        The third element of the sample is the label
-        """
-        x_b = (np.random.rand(self.number_of_samples)*2-1)/2-0.5
-        y_b = (np.random.rand(self.number_of_samples)*2-1)/2+0.5
-        x_r = (np.random.rand(self.number_of_samples)*2-1)/2+0.5
-        y_r = (np.random.rand(self.number_of_samples)*2-1)/2-0.5
-
-        inputs = []
-        labels = []
-        for i, _ in enumerate(x_b):
-            inputs.append([x_b[i], y_b[i]])
-            labels.append(1)
-            inputs.append([x_r[i], y_r[i]])
-            labels.append(-1)
-
-        return inputs, labels
-
 class Perceptron(object):
     """
     Perceptron Classifier

@@ -51,7 +51,7 @@ def one_hot_encoder(data, column_name):
     for label in np.unique(data[column_name]):
         result = [create_boolean_list(x, label) for x in data[column_name]]
         data1.insert(0, label, result)
-        
+
     data1.drop(column_name, axis=1, inplace=True)
     return data1
 

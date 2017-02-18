@@ -45,8 +45,7 @@ class SBS():
             scores = []
             subsets = []
             for idx in combinations(self.indices_, r=dim-1):
-                print idx
-                score = self._calc_score(x_train, y_train, x_test, y_test, idx)
+                score = self._calc_score(x_train, x_test, y_train, y_test, idx)
                 scores.append(score)
                 subsets.append(idx)
 
@@ -88,7 +87,7 @@ def main():
 
     # Split data
     _x_, _y_ = df_wine.iloc[:, 1:], df_wine.iloc[:, 0]
-    x_train, x_test, y_train, y_test = train_test_split(_x_, _y_, test_size=0.3, random_state=0)
+    x_train, x_test, y_train, y_test = train_test_split(_x_, _y_, test_size=0.2, random_state=0)
 
     # Standarize the data and transform training and test data
     s_c = StandardScaler()
@@ -104,8 +103,18 @@ def main():
     plt.plot(k_feat, sbs.scores_, marker='o')
     plt.show()
 
-    print x_test_std
-    print y_test
+    # Accuracy using complete feature set
+    classifier_.fit(x_train_std, y_train)
+    print "Accuracy with complete trainset: %f" % classifier_.score(x_train_std, y_train)
+    print "Accuracy with complete testset: %f" % classifier_.score(x_test_std, y_test)
+    
+    # Accuracy with selected features
+    # sbs.subsets_[8] has only 5 features and has a accuracy of 100%
+    #so we will only feautures in sbs.subsets_[8]
+    k5 = list(sbs.subsets_[8])
+    classifier_.fit(x_train_std[:, k5], y_train)
+    print "Accuracy with selected f in trainset: %f" % classifier_.score(x_train_std[:, k5], y_train)
+    print "Accuracy with selected f in testset: %f" % classifier_.score(x_test_std[:, k5], y_test)
 
 if __name__ == "__main__":
     main()

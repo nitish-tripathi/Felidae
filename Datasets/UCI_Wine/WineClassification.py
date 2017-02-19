@@ -4,6 +4,7 @@ import numpy as np
 from itertools import combinations
 import matplotlib.pyplot as plt
 #from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -89,7 +90,9 @@ def main():
     _x_, _y_ = df_wine.iloc[:, 1:], df_wine.iloc[:, 0]
     x_train, x_test, y_train, y_test = train_test_split(_x_, _y_, test_size=0.2, random_state=0)
 
+    # Feature Reduction using SBS and KNN
     # Standarize the data and transform training and test data
+    """
     s_c = StandardScaler()
     x_train_std = s_c.fit_transform(x_train)
     x_test_std = s_c.fit_transform(x_test)
@@ -107,14 +110,36 @@ def main():
     classifier_.fit(x_train_std, y_train)
     print "Accuracy with complete trainset: %f" % classifier_.score(x_train_std, y_train)
     print "Accuracy with complete testset: %f" % classifier_.score(x_test_std, y_test)
-    
+
     # Accuracy with selected features
     # sbs.subsets_[8] has only 5 features and has a accuracy of 100%
     #so we will only feautures in sbs.subsets_[8]
     k5 = list(sbs.subsets_[8])
     classifier_.fit(x_train_std[:, k5], y_train)
-    print "Accuracy with selected f in trainset: %f" % classifier_.score(x_train_std[:, k5], y_train)
-    print "Accuracy with selected f in testset: %f" % classifier_.score(x_test_std[:, k5], y_test)
+    print "Accuracy with selected f in trainset: %f" % classifier_.score(x_train_std[:, k5],
+                                                                         y_train)
+    print "Accuracy with selected f in testset: %f" % classifier_.score(x_test_std[:, k5],
+                                                                        y_test)
+
+    """
+
+    # Feature reduction using random forest
+    features_list = df_wine.columns[1:]
+    forest = RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
+    forest.fit(x_train, y_train)
+    feature_importance = forest.feature_importances_
+    indices = np.argsort(feature_importance)[::-1]
+
+    for f in range(x_train.shape[1]):
+        print "%d) %s -- %f" % (f, features_list[f], feature_importance[f])
+
+    plt.bar(range(x_train.shape[1]),
+            feature_importance[indices],
+            color='lightblue',
+            align='center')
+    plt.xticks(range(x_train.shape[1]),
+               features_list, rotation=90)
+    plt.show()
 
 if __name__ == "__main__":
     main()

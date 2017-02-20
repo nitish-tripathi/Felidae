@@ -2,8 +2,35 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+from sklearn.linear_model import LogisticRegression
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+def plot_decision_regions(_data_, _target_, classifier, resolution=0.02):
+    """ Plot decision boundary mesh """
+    # setup marker generator and color map
+    markers = ('s', 'x', 'o', '^', 'v')
+    colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
+    cmap = ListedColormap(colors[:len(np.unique(_target_))])
+
+    # plot the decision surface
+    x1_min, x1_max = _data_[:, 0].min() - 1, _data_[:, 0].max() + 1
+    x2_min, x2_max = _data_[:, 1].min() - 1, _data_[:, 1].max() + 1
+    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
+                           np.arange(x2_min, x2_max, resolution))
+    predicted_class = classifier.predict(
+        np.array([xx1.ravel(), xx2.ravel()]).T)
+    predicted_class = predicted_class.reshape(xx1.shape)
+    plt.contourf(xx1, xx2, predicted_class, alpha=0.4, cmap=cmap)
+    plt.xlim(xx1.min(), xx1.max())
+    plt.ylim(xx2.min(), xx2.max())
+
+    # plot class samples
+    for idx, cl in enumerate(np.unique(_target_)):
+        plt.scatter(x=_data_[_target_ == cl, 0], y=_data_[_target_ == cl, 1],
+                    alpha=0.8, c=cmap(idx),
+                    marker=markers[idx], label=cl)
 
 def main():
     """ Main """
@@ -55,6 +82,15 @@ def main():
                                    eigen_pairs[1][1][:, np.newaxis])) # select first two pca
 
     x_train_pca = x_train_std.dot(projection_matrix)
+    
+    classifier_ = LogisticRegression()
+    classifier_.fit(x_train_pca, y_train)
+    
+    x_test_pca = x_test_std.dot(projection_matrix)
+    plot_decision_regions(x_test_pca, y_test, classifier=classifier_)
+    plt.show()
+
+    """
     colors = ['r', 'b', 'g']
     marker = ['s', 'x', 'o']
     for l, c, m in zip(np.unique(y_train), colors, marker):
@@ -64,7 +100,7 @@ def main():
                     label=l,
                     marker=m)
     plt.show()
-
+    """
     # we can also plot the test data by simplying transforming the x_test_std.
 
 if __name__ == "__main__":

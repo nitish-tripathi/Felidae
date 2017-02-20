@@ -92,7 +92,7 @@ def main():
 
     # Feature Reduction using SBS and KNN
     # Standarize the data and transform training and test data
-    """
+    
     s_c = StandardScaler()
     x_train_std = s_c.fit_transform(x_train)
     x_test_std = s_c.fit_transform(x_test)
@@ -121,9 +121,11 @@ def main():
     print "Accuracy with selected f in testset: %f" % classifier_.score(x_test_std[:, k5],
                                                                         y_test)
 
-    """
+    features_list = df_wine.columns[1:]
+    print "Top five features are: %s" % features_list[k5]
 
     # Feature reduction using random forest
+    """
     features_list = df_wine.columns[1:]
     forest = RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
     forest.fit(x_train, y_train)
@@ -140,6 +142,7 @@ def main():
     plt.xticks(range(x_train.shape[1]),
                features_list, rotation=90)
     plt.show()
+    """
 
 if __name__ == "__main__":
     main()

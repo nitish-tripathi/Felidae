@@ -10,8 +10,10 @@ from sklearn.decomposition import PCA
 from sklearn.lda import LDA
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 
 # Turn class label to 0 or 1
 __labeler__ = lambda x: 0 if x == 'M' else 1
@@ -39,22 +41,41 @@ def main():
     x_train_pca = pca.transform(x_train_std)
     x_test_pca = pca.transform(x_test_std)
 
-    classifier_ = LogisticRegression(penalty='l1', C=0.1)
-    classifier_.fit(x_train_pca, y_train)
+    plt.scatter(x_train_pca[y_train == 0][:, 0], x_train_pca[y_train == 0][:, 1], color='red')
+    plt.scatter(x_train_pca[y_train == 1][:, 0], x_train_pca[y_train == 1][:, 1], color='blue')
+    plt.show()
 
-    y_pred_test = classifier_.predict(x_test_pca)
-    y_pred_train = classifier_.predict(x_train_pca)
+    lr_ = LogisticRegression()
+    lr_.fit(x_train_pca, y_train)
 
-    print "Training data PCA Accuracy = %0.02f" % accuracy_score(y_train, y_pred_train)
-    print "Test data PCA Accuracy = %0.02f" % accuracy_score(y_test, y_pred_test)
+    y_pred_test = lr_.predict(x_test_pca)
+    y_pred_train = lr_.predict(x_train_pca)
+
+    print "Training data PCA Accuracy = %0.02f" % accuracy_score(y_train,
+                                                                 y_pred_train)
+    print "Test data PCA Accuracy = %0.02f" % accuracy_score(y_test,
+                                                             y_pred_test)
+    print "----"
+
+    svm = SVC(kernel='rbf', gamma=0.1)
+    svm.fit(x_train_std, y_train)
+
+    y_pred_test = svm.predict(x_test_std)
+    y_pred_train = svm.predict(x_train_std)
+
+    print "Training data SVM Accuracy = %0.02f" % accuracy_score(y_train,
+                                                                 y_pred_train)
+    print "Test data SVM Accuracy = %0.02f" % accuracy_score(y_test,
+                                                             y_pred_test)
+    print "----"
 
     # LDA analysis of the data
-    lda = LDA()
+    lda = LDA(solver='eigen')
     lda.fit(x_train_std, y_train)
     x_train_lda = lda.transform(x_train_std)
     x_test_lda = lda.transform(x_test_std)
 
-    classifier_ = LogisticRegression(penalty='l1', C=0.1)
+    classifier_ = LogisticRegression()
     classifier_.fit(x_train_lda, y_train)
 
     y_pred_test = classifier_.predict(x_test_lda)
@@ -62,9 +83,18 @@ def main():
 
     print "Training data LDA Accuracy = %0.02f" % accuracy_score(y_train, y_pred_train)
     print "Test data LDA Accuracy = %0.02f" % accuracy_score(y_test, y_pred_test)
+    print "----"
+
+    plt.scatter(x_train_lda[y_train == 0][:, 0], x_train_lda[y_train == 0][:, 0], color='red')
+    plt.scatter(x_train_lda[y_train == 1][:, 0], x_train_lda[y_train == 1][:, 0], color='blue')
+    plt.show()
 
     # Random Forest Classifier
-    rfc = RandomForestClassifier(n_estimators=10, criterion='entropy', n_jobs=2)
+    """
+    rfc = RandomForestClassifier(n_estimators=100,
+                                 min_samples_split=25,
+                                 max_depth=7,
+                                 max_features=2)
     rfc.fit(x_train, y_train)
 
     y_pred_test = rfc.predict(x_test)
@@ -72,6 +102,7 @@ def main():
 
     print "Training data Random Forest Accuracy = %0.02f" % accuracy_score(y_train, y_pred_train)
     print "Test data Random Forest Accuracy = %0.02f" % accuracy_score(y_test, y_pred_test)
+    """
 
 if __name__ == "__main__":
     main()

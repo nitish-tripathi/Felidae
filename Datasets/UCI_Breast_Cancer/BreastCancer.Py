@@ -13,7 +13,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.pipeline import Pipeline
+from sklearn.cross_validation import StratifiedKFold
 import matplotlib.pyplot as plt
+import plotly
+import plotly.graph_objs as go
 
 # Turn class label to 0 or 1
 __labeler__ = lambda x: 0 if x == 'M' else 1
@@ -36,16 +40,67 @@ def main():
     x_test_std = sc.transform(x_test)
 
     # PCA analysis of the data
-    pca = PCA(n_components=2)
+
+    # Pipe implementation
+    pipe_pca = Pipeline([('sc', StandardScaler()),
+                         ('pca', PCA(n_components=2)),
+                         ('lr', LogisticRegression())])
+
+    scores = []
+    kfold = StratifiedKFold(y=y_train, n_folds=10, random_state=1)
+    for k, (train, test) in enumerate(kfold):
+        pipe_pca.fit(x_train[train], y_train[train])
+        score = pipe_pca.score(x_train[test], y_train[test])
+        scores.append(score)
+        print "Fold: %d, Acc: %0.02f" % (k, score)
+
+    # PCA standard implementation
+    pca = PCA(n_components=3)
     pca.fit(x_train_std)
     x_train_pca = pca.transform(x_train_std)
     x_test_pca = pca.transform(x_test_std)
 
-    plt.scatter(x_train_pca[y_train == 0][:, 0], x_train_pca[y_train == 0][:, 1], color='red')
-    plt.scatter(x_train_pca[y_train == 1][:, 0], x_train_pca[y_train == 1][:, 1], color='blue')
-    plt.xlabel("PCA1")
-    plt.ylabel("PCA2")
-    plt.show()
+    trace1 = go.Scatter3d(
+        x=x_train_pca[y_train == 0][:, 0],
+        y=x_train_pca[y_train == 0][:, 1],
+        z=x_train_pca[y_train == 0][:, 2],
+        mode='markers',
+        marker=dict(
+            color='rgb(127, 127, 127)',
+            size=3,
+            symbol='circle',
+        )
+    )
+
+    trace2 = go.Scatter3d(
+        x=x_train_pca[y_train == 1][:, 0],
+        y=x_train_pca[y_train == 1][:, 1],
+        z=x_train_pca[y_train == 1][:, 2],
+        mode='markers',
+        marker=dict(
+            color='rgb(254, 0, 0)',
+            size=3,
+            symbol='circle'
+        )
+    )
+
+    data = [trace1, trace2]
+    layout = go.Layout(
+        margin=dict(
+            l=0,
+            r=0,
+            b=0,
+            t=0
+        )
+    )
+    fig = go.Figure(data=data, layout=layout)
+    plotly.offline.plot(fig)
+
+    #plt.scatter(x_train_pca[y_train == 0][:, 0], x_train_pca[y_train == 0][:, 1], color='red')
+    #plt.scatter(x_train_pca[y_train == 1][:, 0], x_train_pca[y_train == 1][:, 1], color='blue')
+    #plt.xlabel("PCA1")
+    #plt.ylabel("PCA2")
+    #plt.show()
 
     lr_ = LogisticRegression()
     lr_.fit(x_train_pca, y_train)

@@ -1,5 +1,5 @@
 
-""" 
+"""
 https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)
 """
 
@@ -43,6 +43,8 @@ def main():
 
     plt.scatter(x_train_pca[y_train == 0][:, 0], x_train_pca[y_train == 0][:, 1], color='red')
     plt.scatter(x_train_pca[y_train == 1][:, 0], x_train_pca[y_train == 1][:, 1], color='blue')
+    plt.xlabel("PCA1")
+    plt.ylabel("PCA2")
     plt.show()
 
     lr_ = LogisticRegression()
@@ -57,7 +59,7 @@ def main():
                                                              y_pred_test)
     print "----"
 
-    svm = SVC(kernel='rbf', gamma=0.1)
+    svm = SVC(kernel='rbf', gamma=0.1, C=2)
     svm.fit(x_train_std, y_train)
 
     y_pred_test = svm.predict(x_test_std)
@@ -85,8 +87,10 @@ def main():
     print "Test data LDA Accuracy = %0.02f" % accuracy_score(y_test, y_pred_test)
     print "----"
 
-    plt.scatter(x_train_lda[y_train == 0][:, 0], x_train_lda[y_train == 0][:, 0], color='red')
-    plt.scatter(x_train_lda[y_train == 1][:, 0], x_train_lda[y_train == 1][:, 0], color='blue')
+    zeros = np.zeros(x_train_lda.shape)
+    plt.scatter(x_train_lda[y_train == 0][:, 0], zeros[y_train == 0][:, 0], color='red')
+    plt.scatter(x_train_lda[y_train == 1][:, 0], zeros[y_train == 1][:, 0], color='blue')
+    plt.xlabel('LDA1')
     plt.show()
 
     # Random Forest Classifier

@@ -5,6 +5,7 @@ https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)
 
 import pandas as pd
 import numpy as np
+import random
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.lda import LDA
@@ -15,6 +16,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.pipeline import Pipeline
 from sklearn.cross_validation import StratifiedKFold
+from sklearn.grid_search import GridSearchCV
 from sklearn.learning_curve import learning_curve, validation_curve
 import matplotlib.pyplot as plt
 import plotly
@@ -23,69 +25,27 @@ import plotly.graph_objs as go
 # Turn class label to 0 or 1
 __labeler__ = lambda x: 0 if x == 'M' else 1
 
-def main():
-    """ Main """
-    df_wdbc = pd.read_csv('wdbc.data', header=None)
-    df_wdbc = df_wdbc.drop(df_wdbc.columns[0], axis=1)
-    print df_wdbc.shape
+__colors__ = ['blue', 'red', 'green', 'black', 'yellow', 'cyan', 'magenta']
 
-    _x_ = df_wdbc.iloc[:, 1:].values
-    _y_ = df_wdbc.iloc[:, 0].values
-    _y_ = np.array([__labeler__(i) for i in _y_])
+def plot_3d(X, y):
+    """ Plot 3d"""
+    data = []
 
-    x_train, x_test, y_train, y_test = train_test_split(_x_, _y_, test_size=0.2, random_state=0)
-    sc = StandardScaler()
-    sc.fit(_x_)
-    x_std = sc.transform(_x_)
-    x_train_std = sc.transform(x_train)
-    x_test_std = sc.transform(x_test)
-
-    # PCA analysis of the data
-
-    # Pipe implementation
-    pipe_pca = Pipeline([('sc', StandardScaler()),
-                         ('pca', PCA(n_components=2)),
-                         ('lr', LogisticRegression())])
-
-    scores = []
-    kfold = StratifiedKFold(y=y_train, n_folds=10, random_state=1)
-    for k, (train, test) in enumerate(kfold):
-        pipe_pca.fit(x_train[train], y_train[train])
-        score = pipe_pca.score(x_train[test], y_train[test])
-        scores.append(score)
-        print "Fold: %d, Acc: %0.02f" % (k, score)
-
-    # PCA standard implementation
-    pca = PCA(n_components=3)
-    pca.fit(x_train_std)
-    x_train_pca = pca.transform(x_train_std)
-    x_test_pca = pca.transform(x_test_std)
-
-    trace1 = go.Scatter3d(
-        x=x_train_pca[y_train == 0][:, 0],
-        y=x_train_pca[y_train == 0][:, 1],
-        z=x_train_pca[y_train == 0][:, 2],
-        mode='markers',
-        marker=dict(
-            color='rgb(127, 127, 127)',
-            size=3,
-            symbol='circle',
+    for i in np.unique(y):
+        color = random.choice(__colors__)
+        trace = go.Scatter3d(
+            x=X[y == i][:, 0],
+            y=X[y == i][:, 1],
+            z=X[y == i][:, 2],
+            mode='markers',
+            marker=dict(
+                color=color,
+                size=3,
+                symbol='circle',
+            )
         )
-    )
+        data.append(trace)
 
-    trace2 = go.Scatter3d(
-        x=x_train_pca[y_train == 1][:, 0],
-        y=x_train_pca[y_train == 1][:, 1],
-        z=x_train_pca[y_train == 1][:, 2],
-        mode='markers',
-        marker=dict(
-            color='rgb(254, 0, 0)',
-            size=3,
-            symbol='circle'
-        )
-    )
-
-    data = [trace1, trace2]
     layout = go.Layout(
         margin=dict(
             l=0,
@@ -96,6 +56,38 @@ def main():
     )
     fig = go.Figure(data=data, layout=layout)
     plotly.offline.plot(fig)
+
+def main():
+    """ Main """
+
+    # Read csv file
+    df_wdbc = pd.read_csv('wdbc.data', header=None)
+    df_wdbc = df_wdbc.drop(df_wdbc.columns[0], axis=1)
+    print df_wdbc.shape
+
+    _x_ = df_wdbc.iloc[:, 1:].values
+    _y_ = df_wdbc.iloc[:, 0].values
+    _y_ = np.array([__labeler__(i) for i in _y_])
+
+    # Split data into test and training set
+    x_train, x_test, y_train, y_test = train_test_split(_x_, _y_, test_size=0.2, random_state=0)
+
+    # Standarize data
+    sc = StandardScaler()
+    sc.fit(_x_)
+    x_std = sc.transform(_x_)
+    x_train_std = sc.transform(x_train)
+    x_test_std = sc.transform(x_test)
+
+    # PCA analysis of the data
+
+    # PCA standard implementation
+    pca = PCA(n_components=3)
+    pca.fit(x_train_std)
+    x_train_pca = pca.transform(x_train_std)
+    x_test_pca = pca.transform(x_test_std)
+
+    plot_3d(x_train_pca, y_train)
 
     #plt.scatter(x_train_pca[y_train == 0][:, 0], x_train_pca[y_train == 0][:, 1], color='red')
     #plt.scatter(x_train_pca[y_train == 1][:, 0], x_train_pca[y_train == 1][:, 1], color='blue')
@@ -256,6 +248,47 @@ def train_learning_curve():
     plt.legend(loc='lower right')
     plt.show()
 
+def grid_search():
+    """ Curve """
+    df_wdbc = pd.read_csv('wdbc.data', header=None)
+    df_wdbc = df_wdbc.drop(df_wdbc.columns[0], axis=1)
+    print df_wdbc.shape
+
+    _x_ = df_wdbc.iloc[:, 1:].values
+    _y_ = df_wdbc.iloc[:, 0].values
+    _y_ = np.array([__labeler__(i) for i in _y_])
+
+    x_train, x_test, y_train, y_test = train_test_split(_x_, _y_, test_size=0.2, random_state=0)
+
+    pipe_svc = Pipeline([
+        ('scl', StandardScaler()),
+        ('pca', PCA(n_components=3)),
+        ('clf', SVC(kernel='rbf', C=1000, gamma=0.0001, random_state=1))
+    ])
+
+    pipe_svc.fit(x_train, y_train)
+    print "Test score: %0.02f" % pipe_svc.score(x_test, y_test)
+    print "Training score: %0.0f" % pipe_svc.score(x_train, y_train)
+
+    """
+    param_range = [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+    param_grid = [{'clf__C': param_range,
+                   'clf__kernel': ['linear']},
+                  {'clf__C': param_range,
+                   'clf__gamma': param_range,
+                   'clf__kernel': ['rbf']}]
+
+    gs = GridSearchCV(estimator=pipe_svc,
+                      param_grid=param_grid,
+                      scoring='accuracy',
+                      cv=10,
+                      n_jobs=-1)
+    gs.fit(x_train, y_train)
+    print gs.best_score_
+    print gs.best_params_
+    """
+
 if __name__ == "__main__":
-    #main()
-    train_learning_curve()
+    main()
+    #grid_search()
+    #train_learning_curve()

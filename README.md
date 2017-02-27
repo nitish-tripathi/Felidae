@@ -3,7 +3,7 @@
 
 # Simplery
 
-Learning-By-Doing is a concept by which productivity is achieved through practice, self-perfection and minor innovations. [https://en.wikipedia.org/wiki/Learning-by-doing_(economics)]
+According to wikipedia, Learning-By-Doing is a concept by which productivity is achieved through practice, self-perfection and minor innovations. [https://en.wikipedia.org/wiki/Learning-by-doing_(economics)]
 
 This is my attempt to learn machine learning by following the book "Python Machine Learning" by Sebastian Raschka. This is an awesome book, and I am throughly enjoying working my way through it. 
 

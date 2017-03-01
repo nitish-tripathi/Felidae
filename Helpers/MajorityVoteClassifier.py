@@ -1,9 +1,9 @@
 
 from sklearn.base import BaseEstimator, ClassifierMixin, clone
+from sklearn.externals import six
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import _name_estimators
 import numpy as np
-import operator
 
 class MajorityVoteClassifier(BaseEstimator, ClassifierMixin):
     """ A Majority Vote Classifier"""
@@ -32,6 +32,42 @@ class MajorityVoteClassifier(BaseEstimator, ClassifierMixin):
 
         return self
 
+    def predict(self, X):
+        """ Predict """
+        if self.vote == 'classlabel':
+            # Collect predictions from every Classifier
+            predictions = np.asarray([clf.predict(X) for clf in self.classifiers_]).T
+            maj_vote = np.apply_along_axis(lambda x: np.argmax(np.bincount(x,
+                                                                           weights=self.weights)),
+                                           axis=1,
+                                           arr=predictions)
+        elif self.vote == 'probability':
+            maj_vote = np.argmax(self.predict_proba(X),
+                                 axis=1)
+
+        maj_vote = self.lablenc_.inverse_transform(maj_vote)
+        return maj_vote
+
+    def predict_proba(self, X):
+        """ Predict probability """
+        probas = np.asarray([clf.predict_proba(X) for clf in self.classifiers_])
+        avg_probas = np.average(probas, axis=0, weights=self.weights)
+        return avg_probas
+
+    def get_params(self, deep=True):
+        """ Get classifier parameter names for GridSearch"""
+        if not deep:
+            return super(MajorityVoteClassifier,
+                         self).get_params(deep=False)
+        else:
+            out = self.named_classifiers.copy()
+            for name, step in\
+                    six.iteritems(self.named_classifiers):
+                for key, value in six.iteritems(
+                        step.get_params(deep=True)):
+                    out['%s__%s' % (name, key)] = value
+
+        return out
 
 def main():
     """ Main """

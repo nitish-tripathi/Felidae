@@ -1,8 +1,15 @@
 
+from sklearn import datasets
 from sklearn.base import BaseEstimator, ClassifierMixin, clone
 from sklearn.externals import six
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import _name_estimators
+from sklearn.cross_validation import train_test_split, cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 class MajorityVoteClassifier(BaseEstimator, ClassifierMixin):
@@ -71,7 +78,42 @@ class MajorityVoteClassifier(BaseEstimator, ClassifierMixin):
 
 def main():
     """ Main """
-    print "Main"
+
+    df_iris = datasets.load_iris()
+    _x_ = df_iris.data[50:, [1, 2]]
+    _y_ = df_iris.target[50:]
+
+    label_encoder = LabelEncoder()
+    label_encoder.fit(_y_)
+    _y_ = label_encoder.transform(_y_)
+
+    x_train, x_test, y_train, y_test = train_test_split(_x_, _y_, test_size=0.5, random_state=1)
+
+    clf1 = LogisticRegression(penalty='l2', C=0.001, random_state=0)
+    clf2 = DecisionTreeClassifier(criterion="entropy", max_depth=1)
+    clf3 = KNeighborsClassifier(n_neighbors=1, p=2, metric='minkowski')
+
+    pipe1 = Pipeline([
+        ['sc', StandardScaler()],
+        ['clf', clf1]
+    ])
+
+    pipe3 = Pipeline([
+        ['sc', StandardScaler()],
+        ['clf', clf3]
+    ])
+
+    mv_clf = MajorityVoteClassifier(classifiers=[pipe1, clf2, pipe3])
+    
+    clf_labels = ['Logistic Regression', 'Decision Tree', 'KNN', 'Majority Voting']
+    all_clf = [pipe1, clf2, pipe3, mv_clf]
+
+    for clf, label in zip(all_clf, clf_labels):
+        scores = cross_val_score(estimator=clf,
+                                 X=x_train,
+                                 y=y_train,
+                                 scoring='roc_auc')
+        print "Accuracy: %0.2f (+/- %0.2f) [%s]" % (scores.mean(), scores.std(), label)
 
 if __name__ == "__main__":
     main()

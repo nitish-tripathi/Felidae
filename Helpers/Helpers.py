@@ -4,7 +4,12 @@ from matplotlib.colors import ListedColormap
 import numpy as np
 
 class Helpers(object):
-    """ Helpers class """
+    """ 
+    A Helper Module
+    You can: 
+        1. plot_decision_regions
+        2. generate_random_2d_data
+    """
 
     def __init__(self):
         """ Default initializer for Helpers class"""

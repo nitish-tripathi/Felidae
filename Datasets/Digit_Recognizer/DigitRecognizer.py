@@ -3,6 +3,8 @@ import os
 import struct
 import numpy as np
 import matplotlib.pyplot as plt
+from neuralnet import NeuralNetMLP
+from sklearn.metrics import accuracy_score
 
 def load_mnist(kind='train'):
     """ Load MNIST data """
@@ -35,6 +37,7 @@ def main():
     print "Test Images- Rows: %d, Columns: %d" % (X_test.shape[0], X_test.shape[1])
     print "Test Labels- Rows: %d" % (y_test.shape[0])
 
+    """
     # Show one sample for every type of digit
     fig, ax = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True)
     ax = ax.flatten()
@@ -54,6 +57,24 @@ def main():
     ax[0].set_xticks([])
     ax[0].set_yticks([])
     plt.show()
+    """
+
+    nn = NeuralNetMLP(n_output=10, 
+                  n_features=X_train.shape[1], 
+                  n_hidden=50, 
+                  l2=0.1, 
+                  l1=0.0, 
+                  epochs=1000, 
+                  eta=0.001,
+                  alpha=0.001,
+                  decrease_const=0.00001,
+                  minibatches=50, 
+                  shuffle=True,
+                  random_state=1)
+
+    nn.fit(X_train, y_train, print_progress=True)
+    y_train_pred = nn.predict(X_train)
+    print "accuracy_score: %0.2f" % accuracy_score(y_train, y_train_pred)
 
 if __name__ == '__main__':
     main()

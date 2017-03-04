@@ -84,8 +84,10 @@ def main():
     """ main """
     # Generate moon data
     np.random.seed(0)
-    X, y = make_moons(200, noise=0.2)
-    clf_nn = MultiNeuralNetwork(num_outputs=2)
+    #X, y = make_moons(200, noise=0.2)
+    X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
+
+    clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
     clf_nn.fit(X, y)
     plot_decision_regions(X, y, classifier=clf_nn)
     plt.show()

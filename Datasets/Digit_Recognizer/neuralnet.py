@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.special import expit
 import sys
+import cPickle
 
 class NeuralNetMLP(object):
     """ Feedforward neural network / Multi-layer perceptron classifier.
@@ -323,5 +324,12 @@ class NeuralNetMLP(object):
                 self.w1 -= (delta_w1 + (self.alpha * delta_w1_prev))
                 self.w2 -= (delta_w2 + (self.alpha * delta_w2_prev))
                 delta_w1_prev, delta_w2_prev = delta_w1, delta_w2
-
+        
+        print ""
         return self
+        
+    def save(self, filename='model'):
+        """ Save model for later user """
+        f = open(filename, 'wb')
+        cPickle.dump(self, f, protocol=-1)
+        f.close()

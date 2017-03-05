@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from neuralnet import NeuralNetMLP
 from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 
 def load_mnist(kind='train'):
     """ Load MNIST data """
@@ -73,8 +74,13 @@ def main():
                   random_state=1)
 
     nn.fit(X_train, y_train, print_progress=True)
+    nn.save()
     y_train_pred = nn.predict(X_train)
-    print "accuracy_score: %0.2f" % accuracy_score(y_train, y_train_pred)
+
+    acc = ((np.sum(y_train == y_train_pred, axis=0)).astype('float') /
+           X_train.shape[0])
+
+    print "Accuracy: %0.2f" % acc
 
 if __name__ == '__main__':
     main()

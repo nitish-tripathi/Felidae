@@ -1,9 +1,10 @@
 
+import sys
+import cPickle
 import numpy as np
-from sklearn.datasets import make_moons, make_circles
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-import cPickle
+from sklearn.datasets import make_moons, make_circles
 
 class MultiNeuralNetwork(object):
     """ Multiple Neural Network Implementation """
@@ -44,9 +45,9 @@ class MultiNeuralNetwork(object):
         # Initialize the parameters to random values. We need to learn these.
         np.random.seed(0)
         self.W1 = np.random.randn(nn_input_dim, self._hidden_layer) / np.sqrt(nn_input_dim)
-        self.b1 = np.zeros((1, self._hidden_layer))
+        self.b1 = np.zeros((1, self.W1.shape[1]))
         self.W2 = np.random.randn(self._hidden_layer, self.num_outputs) / np.sqrt(self._hidden_layer)
-        self.b2 = np.zeros((1, self.num_outputs))
+        self.b2 = np.zeros((1, self.W2.shape[1]))
         
         # Gradient descent. For each batch...
         for i in xrange(0, self.max_iter):
@@ -80,8 +81,9 @@ class MultiNeuralNetwork(object):
             # Assign new parameters to the model
             self.model = { 'W1': self.W1, 'b1': self.b1, 'W2': self.W2, 'b2': self.b2}
             if print_progress == True:
-                print "Epoch %d of %d" % (i, self.max_iter)
-    
+                sys.stderr.write('\rEpoch: %d/%d' % (i+1, self.max_iter))
+                sys.stderr.flush()
+
     def save(self, filename='model'):
         """ Save model for later user """
         f = open(filename, 'wb')
@@ -92,15 +94,15 @@ def main():
     """ main """
     # Generate moon data
     np.random.seed(0)
-    #X, y = make_moons(200, noise=0.2)
-    X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
+    X, y = make_moons(200, noise=0.2)
+    #X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
 
-    #clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
-    #clf_nn.fit(X, y, print_progress=True)
-    #clf_nn.save()
+    clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
+    clf_nn.fit(X, y, print_progress=True)
+    clf_nn.save()
 
-    f = open('model', 'rb')
-    clf_nn = cPickle.load(f)
+    #f = open('model', 'rb')
+    #clf_nn = cPickle.load(f)
 
     plot_decision_regions(X, y, classifier=clf_nn)
     plt.show()

@@ -23,11 +23,14 @@ class MultiNeuralNetwork(object):
         """
         Helper function to predict an output (0 or 1)
         """
+        # TODO: Call ForwardPropogation Method
         W1, b1, W2, b2 = self.model['W1'], self.model['b1'], self.model['W2'], self.model['b2']
         # Forward propagation
         z1 = X.dot(W1) + b1
         a1 = np.tanh(z1)
         z2 = a1.dot(W2) + b2
+        
+        # Softmax operation
         exp_scores = np.exp(z2)
         probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
         return np.argmax(probs, axis=1)
@@ -52,9 +55,11 @@ class MultiNeuralNetwork(object):
         # Gradient descent. For each batch...
         for i in xrange(0, self.max_iter):
             # Forward propagation
+            # TODO: Move this operation to new method Forward Propagation
             z1 = X.dot(self.W1) + self.b1
             a1 = np.tanh(z1)
             z2 = a1.dot(self.W2) + self.b2
+            # Softmax operation
             exp_scores = np.exp(z2)
             probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 

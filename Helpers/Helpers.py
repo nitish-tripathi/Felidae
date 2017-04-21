@@ -42,7 +42,7 @@ class Helpers(object):
 
     def generate_random_2d_data(self, number_of_samples=200):
         """
-        generates a 2D linearly separable dataset with n samples.
+        Generates a 2D linearly separable dataset with n samples.
         The third element of the sample is the label
         """
         x_b = (np.random.rand(number_of_samples)*2-1)/2-0.5

@@ -1,4 +1,5 @@
 
+import os.path
 import sys
 import cPickle
 import numpy as np
@@ -94,15 +95,37 @@ def main():
     """ main """
     # Generate moon data
     np.random.seed(0)
-    X, y = make_moons(200, noise=0.2)
-    #X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
 
-    clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
-    clf_nn.fit(X, y, print_progress=True)
-    clf_nn.save()
-
-    #f = open('model', 'rb')
-    #clf_nn = cPickle.load(f)
+    print "1. make_moons"
+    print "2. make_circles"
+    type_data = raw_input("Enter demo data type:")
+    
+    if type_data == '1':
+        X, y = make_moons(200, noise=0.2)
+        filename = "make_moons.model"
+    elif type_data == '2':
+        X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
+        filename = "make_circles.model"
+    else:
+        print "Wrong type"
+        exit()
+    
+    if(os.path.isfile(filename)):
+        print "\nModel: %s is present" % filename
+        load_model_decision = raw_input("Do you want to load saved model? (y/n)")
+        if(load_model_decision == 'Y' or load_model_decision == 'y'):
+            f = open(filename, 'rb')
+            clf_nn = cPickle.load(f)
+        else:
+            print "Training model..."
+            clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
+            clf_nn.fit(X, y, print_progress=True)
+            clf_nn.save(filename)
+    else:
+         print "Training model..."
+         clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
+         clf_nn.fit(X, y, print_progress=True)
+         clf_nn.save(filename)
 
     plot_decision_regions(X, y, classifier=clf_nn)
     plt.show()

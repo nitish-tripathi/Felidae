@@ -1,4 +1,9 @@
 
+"""
+http://www.wildml.com/2015/09/implementing-a-neural-network-from-scratch/
+http://cs231n.github.io/optimization-2/
+"""
+
 import os.path
 import sys
 import cPickle
@@ -7,18 +12,46 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn.datasets import make_moons, make_circles
 
+def tanh_deriv(x):
+    return 1.0 - np.tanh(x)**2
+
 class MultiNeuralNetwork(object):
     """ Multiple Neural Network Implementation """
 
-    def __init__(self, num_outputs=1, hidden_layer=3, max_iter=20000, _learning_rate=0.01, C=0.01):
+    def __init__(self, network_structure = np.array([2,3,2]), max_iter=20000, _learning_rate=0.01, C=0.01):
         """ Initialize """
         self._learning_rate = _learning_rate
         self.__weights__ = np.zeros(0)
-        self._hidden_layer = hidden_layer
+        self._network_structure = network_structure
         self.max_iter = max_iter
         self.model = {}
-        self.num_outputs = num_outputs
         self.C = C
+        self.Weights = []
+        self.Baises = []
+    
+    def __forward_propogation__(self, X):
+        """ 
+        Calculate the forward propogation of the complete network
+        using current weights and baises
+        """
+        assert(len(self.Weights) != len(self.Baises), "Houston! we've got a problem.")
+
+        layer_input = X
+        activation_layer = []
+
+        for w, b in zip(self.Weights[:-1], self.Baises[:-1]):
+            o = layer_input.dot(w) + b
+            a = np.tanh(o)
+            layer_input = a
+            activation_layer.append(a)
+        
+        output_layer = activation_layer[-1].dot(self.Weights[-1]) + self.Baises[-1]
+        
+        # Softmax
+        exp_scores = np.exp(output_layer)
+        probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+        
+        return probs
 
     def predict(self, X):
         """
@@ -44,25 +77,33 @@ class MultiNeuralNetwork(object):
         - print_loss: If True, print the loss every 1000 iterations
         """
         num_examples = len(X) # training set size
-        nn_input_dim = X.shape[1] # input layer dimensionality
+        nn_input_dim = self._network_structure[0] # input layer dimensionality
 
         # Initialize the parameters to random values. We need to learn these.
         np.random.seed(0)
-        self.W1 = np.random.randn(nn_input_dim, self._hidden_layer) / np.sqrt(nn_input_dim)
-        self.b1 = np.zeros((1, self.W1.shape[1]))
-        self.W2 = np.random.randn(self._hidden_layer, self.num_outputs) / np.sqrt(self._hidden_layer)
-        self.b2 = np.zeros((1, self.W2.shape[1]))
+        for idx in reversed(range(len(self._network_structure))):
+            if(idx != 0):
+                w = np.random.randn(self._network_structure[idx-1],self._network_structure[idx]) / np.sqrt(self._network_structure[idx-1])
+                self.Weights.append(w)
+                b = np.zeros((1, w.shape[1]))
+                self.Baises.append(b)
+
+        self.Weights = self.Weights[::-1]
+        self.Baises = self.Baises[::-1]
         
         # Gradient descent. For each batch...
         for i in xrange(0, self.max_iter):
             # Forward propagation
             # TODO: Move this operation to new method Forward Propagation
+            """
             z1 = X.dot(self.W1) + self.b1
             a1 = np.tanh(z1)
             z2 = a1.dot(self.W2) + self.b2
             # Softmax operation
             exp_scores = np.exp(z2)
             probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+            """
+            probs = self.__forward_propogation__(X)
 
             # Backpropagation
             delta3 = probs
@@ -79,6 +120,7 @@ class MultiNeuralNetwork(object):
 
             # Gradient descent parameter update
             self.W1 += -self._learning_rate * dW1
+            self.b1 += -self._learning_rate * db1
             self.b1 += -self._learning_rate * db1
             self.W2 += -self._learning_rate * dW2
             self.b2 += -self._learning_rate * db2
@@ -122,12 +164,14 @@ def main():
             clf_nn = cPickle.load(f)
         else:
             print "Training model..."
-            clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
+            network_structure = np.array([2,3,2])
+            clf_nn = MultiNeuralNetwork(network_structure)
             clf_nn.fit(X, y, print_progress=True)
             clf_nn.save(filename)
     else:
          print "Training model..."
-         clf_nn = MultiNeuralNetwork(num_outputs=2, hidden_layer=3)
+         network_structure = np.array([2,3,2])
+         clf_nn = MultiNeuralNetwork(network_structure)
          clf_nn.fit(X, y, print_progress=True)
          clf_nn.save(filename)
 

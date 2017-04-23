@@ -5,6 +5,7 @@ import random
 
 # Third-party libraries
 import numpy as np
+import MNIST_Loader
 
 class Network(object):
 
@@ -143,7 +144,9 @@ def sigmoid_prime(z):
 
 def main():
     """ Main """
-    nn = Network([2,3,2])
+    training_data, validation_data, test_data = MNIST_Loader.load_data_wrapper()
+    net = Network([784, 30, 10])
+    net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
 
 if __name__ == "__main__":
     main()

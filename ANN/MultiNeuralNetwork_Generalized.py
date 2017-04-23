@@ -2,6 +2,7 @@
 """
 http://www.wildml.com/2015/09/implementing-a-neural-network-from-scratch/
 http://cs231n.github.io/optimization-2/
+http://neuralnetworksanddeeplearning.com/chap1.html#implementing_our_network_to_classify_digits
 """
 
 import os.path

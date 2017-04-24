@@ -6,6 +6,7 @@ import random
 # Third-party libraries
 import numpy as np
 import MNIST_Loader
+from sklearn.datasets import make_moons, make_circles
 
 class Network(object):
 
@@ -124,6 +125,7 @@ class Network(object):
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
+
         test_results = [(np.argmax(self.feedforward(x)), y)
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
@@ -144,9 +146,31 @@ def sigmoid_prime(z):
 
 def main():
     """ Main """
-    training_data, validation_data, test_data = MNIST_Loader.load_data_wrapper()
-    net = Network([784, 30, 10])
-    net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
+    #training_data, validation_data, test_data = MNIST_Loader.load_data_wrapper()
+    #xxx = training_data[0]
+    #net = Network([784, 30, 10])
+    #net.SGD(training_data[:100], 30, 10, 3.0, test_data=test_data[:10])
+    
+    
+    #X, y = make_moons(200, noise=0.2)
+    X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
+    training_inputs = [np.reshape(x, (X.shape[1], 1)) for x in X]
+    y1 = one_hot_encoder(y)
+    training_results = [np.reshape(x, (y1.shape[1], 1)) for x in y1]
+    training_data = zip(training_inputs, training_results)
+    test_data = zip(training_inputs, y)
+
+    net = Network([2,3,3,2])
+    net.SGD(training_data, 100, 1, 1, test_data=test_data)
+
+def one_hot_encoder(data):
+    create_entry = lambda x : [1, 0] if x == 0 else [0, 1]
+    data1 = []
+    for x in data:
+        e = create_entry(x)
+        data1.append(e)
+    return np.array(data1)
+
 
 if __name__ == "__main__":
     main()

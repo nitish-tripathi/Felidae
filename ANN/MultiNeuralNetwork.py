@@ -131,8 +131,12 @@ def main():
          clf_nn.fit(X, y, print_progress=True)
          clf_nn.save(filename)
 
-    plot_decision_regions(X, y, classifier=clf_nn)
-    plt.show()
+    prec = clf_nn.predict(X)
+    test_result = zip(prec, y)
+    result = sum(int(x == y) for (x, y) in test_result)
+    print result
+    #plot_decision_regions(X, y, classifier=clf_nn)
+    #plt.show()
 
 
 def plot_decision_regions(_data_, _target_, classifier, resolution=0.02):

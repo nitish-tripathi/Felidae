@@ -1,6 +1,11 @@
 
+"""
+http://neuralnetworksanddeeplearning.com/chap1.html#implementing_our_network_to_classify_digits
+"""
+
 #### Libraries
 # Standard library
+import sys
 import random
 
 # Third-party libraries
@@ -67,7 +72,10 @@ class Network(object):
                 print "Epoch {0}: {1} / {2}".format(
                     j, self.evaluate(test_data), n_test)
             else:
-                print "Epoch {0} complete".format(j)
+                #print "Epoch {0} complete".format(j)
+                sys.stderr.write('\rEpoch: %d/%d' % (j+1, epochs))
+                sys.stderr.flush()
+        print ""
 
     def __update_mini_batch__(self, mini_batch, eta):
         """Update the network's weights and biases by applying
@@ -167,7 +175,7 @@ def main():
     # Test data does not have result should not be one-hot-encoded
     test_data = zip(training_inputs, y)
 
-    net = Network([2,3,2])
+    net = Network([2,4,4,2])
     net.fit(training_data, 300, 1, 1)
     print "Result: {0}/{1}".format(net.evaluate(test_data), len(test_data))
 
@@ -178,7 +186,6 @@ def one_hot_encoder(data):
         e = create_entry(x)
         data1.append(e)
     return np.array(data1)
-
 
 if __name__ == "__main__":
     main()

@@ -108,7 +108,7 @@ def main():
         X, y = make_moons(200, noise=0.2)
         filename = "make_moons.model"
     elif type_data == '2':
-        X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
+        X, y = make_circles(300, shuffle=True, noise=0.2, factor=0.5)
         filename = "make_circles.model"
     else:
         print "Wrong type"
@@ -134,7 +134,7 @@ def main():
     prec = clf_nn.predict(X)
     test_result = zip(prec, y)
     result = sum(int(x == y) for (x, y) in test_result)
-    print result
+    print "\n Result: {0} ".format(result)
     #plot_decision_regions(X, y, classifier=clf_nn)
     #plt.show()
 

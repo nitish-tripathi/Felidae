@@ -33,7 +33,7 @@ class Network(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
+    def fit(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
         """
         Train the neural network using mini-batch stochastic
@@ -61,7 +61,7 @@ class Network(object):
 
             # Then for each mini_batch we apply a single step of gradient descent
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta)
+                self.__update_mini_batch__(mini_batch, eta)
             
             if test_data:
                 print "Epoch {0}: {1} / {2}".format(
@@ -69,7 +69,7 @@ class Network(object):
             else:
                 print "Epoch {0} complete".format(j)
 
-    def update_mini_batch(self, mini_batch, eta):
+    def __update_mini_batch__(self, mini_batch, eta):
         """Update the network's weights and biases by applying
         gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
@@ -77,7 +77,7 @@ class Network(object):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
-            delta_nabla_b, delta_nabla_w = self.backprop(x, y)
+            delta_nabla_b, delta_nabla_w = self.__backprop__(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         self.weights = [w-(eta/len(mini_batch))*nw
@@ -85,7 +85,7 @@ class Network(object):
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)]
 
-    def backprop(self, x, y):
+    def __backprop__(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
         gradient for the cost function C_x.  ``nabla_b`` and
         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
@@ -102,7 +102,7 @@ class Network(object):
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
-        delta = self.cost_derivative(activations[-1], y) * \
+        delta = self.__cost_derivative__(activations[-1], y) * \
             sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
@@ -129,8 +129,8 @@ class Network(object):
         test_results = [(np.argmax(self.feedforward(x)), y)
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
-
-    def cost_derivative(self, output_activations, y):
+   
+    def __cost_derivative__(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
         return (output_activations-y)
@@ -149,27 +149,27 @@ def main():
     #training_data, validation_data, test_data = MNIST_Loader.load_data_wrapper()
     #xxx = training_data[0]
     #net = Network([784, 30, 10])
-    #net.SGD(training_data[:100], 30, 10, 3.0, test_data=test_data[:10])
-    
+    #net.fit(training_data[:100], 30, 10, 3.0, test_data=test_data[:10])
     
     #X, y = make_moons(200, noise=0.2)
-    X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
-    
+    X, y = make_circles(300, shuffle=True, noise=0.2, factor=0.5)
+
     # Make sure each input in dataset has the shape (2,1)
     training_inputs = [np.reshape(x, (X.shape[1], 1)) for x in X]
-    y1 = one_hot_encoder(y)
-    
+
     # Make sure that each result has the shape (2,1)
-    training_results = [np.reshape(x, (y1.shape[1], 1)) for x in y1]
-    
+    y_encoded = one_hot_encoder(y)
+    training_results = [np.reshape(x, (y_encoded.shape[1], 1)) for x in y_encoded]
+
     # Make a tuple of (X, y1)
     training_data = zip(training_inputs, training_results)
-    
+        
     # Test data does not have result should not be one-hot-encoded
     test_data = zip(training_inputs, y)
 
-    net = Network([2,3,3,2])
-    net.SGD(training_data, 100, 1, 1, test_data=test_data)
+    net = Network([2,3,2])
+    net.fit(training_data, 300, 1, 1)
+    print "Result: {0}/{1}".format(net.evaluate(test_data), len(test_data))
 
 def one_hot_encoder(data):
     create_entry = lambda x : [1, 0] if x == 0 else [0, 1]

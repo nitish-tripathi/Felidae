@@ -154,10 +154,18 @@ def main():
     
     #X, y = make_moons(200, noise=0.2)
     X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
+    
+    # Make sure each input in dataset has the shape (2,1)
     training_inputs = [np.reshape(x, (X.shape[1], 1)) for x in X]
     y1 = one_hot_encoder(y)
+    
+    # Make sure that each result has the shape (2,1)
     training_results = [np.reshape(x, (y1.shape[1], 1)) for x in y1]
+    
+    # Make a tuple of (X, y1)
     training_data = zip(training_inputs, training_results)
+    
+    # Test data does not have result should not be one-hot-encoded
     test_data = zip(training_inputs, y)
 
     net = Network([2,3,3,2])

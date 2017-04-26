@@ -1,20 +1,22 @@
 
 import numpy as np
 from sklearn.datasets import make_moons, make_circles
+
 from Odin.Network import Network
+from Odin import MNIST_Loader
 
 def main():
     """ Main """
     
     """
-    training_data, validation_data, test_data = Odin.MNIST_Loader.load_data_wrapper()
+    training_data, validation_data, test_data = MNIST_Loader.load_data_wrapper()
     #xxx = training_data[0]
     net = Network([784, 30, 10])
     net.fit(training_data, 30, 10, 3.0, test_data=test_data)
     """
 
-    #X, y = make_moons(200, noise=0.2)
-    X, y = make_circles(300, shuffle=True, noise=0.2, factor=0.5)
+    X, y = make_moons(200, noise=0.2)
+    #X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
 
     # Make sure each input in dataset has the shape (2,1)
     training_inputs = [np.reshape(x, (X.shape[1], 1)) for x in X]
@@ -32,6 +34,8 @@ def main():
     net = Network([2,4,4,2])
     net.fit(training_data, 300, 1, 1)
     print "Result: {0}/{1}".format(net.evaluate(test_data), len(test_data))
+    net.save("moons.model")
+
 
 def one_hot_encoder(data):
     create_entry = lambda x : [1, 0] if x == 0 else [0, 1]

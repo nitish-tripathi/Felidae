@@ -9,6 +9,7 @@ http://numericinsight.com/uploads/A_Gentle_Introduction_to_Backpropagation.pdf
 # Standard library
 import sys
 import random
+import cPickle
 
 # Third-party libraries
 import numpy as np
@@ -142,6 +143,12 @@ class Network(object):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
         return (output_activations-y)
+    
+    def save(self, filename="model"):
+        """ Method to save the trained model"""
+        f = open(filename, 'wb')
+        cPickle.dump(self, f, protocol=-1)
+        f.close()
 
 #### Miscellaneous functions
 def sigmoid(z):

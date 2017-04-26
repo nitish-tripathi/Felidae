@@ -2,8 +2,7 @@
 import numpy as np
 from sklearn.datasets import make_moons, make_circles
 
-from Odin.Network import Network
-from Odin import MNIST_Loader
+from Odin import Network, MNIST_Loader
 
 def main():
     """ Main """
@@ -31,7 +30,7 @@ def main():
     # Test data does not have result should not be one-hot-encoded
     test_data = zip(training_inputs, y)
 
-    net = Network([2,4,4,2])
+    net = Network.Network([2,4,4,2])
     net.fit(training_data, 300, 1, 1)
     print "Result: {0}/{1}".format(net.evaluate(test_data), len(test_data))
     net.save("moons.model")

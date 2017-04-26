@@ -1,6 +1,7 @@
 
 """
 http://neuralnetworksanddeeplearning.com/chap1.html#implementing_our_network_to_classify_digits
+http://neuralnetworksanddeeplearning.com/chap2.html
 """
 
 #### Libraries

@@ -33,11 +33,24 @@ class Network(object):
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
 
-    def feedforward(self, a):
+    def __feedforward__(self, a):
         """Return the output of the network if ``a`` is input."""
         for b, w in zip(self.biases, self.weights):
             a = sigmoid(np.dot(w, a)+b)
         return a
+    
+    def __feedforward2__(self, a):
+        zs = []
+        activations = [a]
+
+        activation = a
+        for b, w in zip(self.biases, self.weights):
+            z = np.dot(w, activation) + b
+            zs.append(z)
+            activation = sigmoid(z)
+            activations.append(activation)
+
+        return (zs, activations)
 
     def fit(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
@@ -67,6 +80,7 @@ class Network(object):
 
             # Then for each mini_batch we apply a single step of gradient descent
             for mini_batch in mini_batches:
+                #self.__update_mini_batch_old__(mini_batch, eta)
                 self.__update_mini_batch__(mini_batch, eta)
             
             if test_data:
@@ -78,11 +92,7 @@ class Network(object):
                 sys.stderr.flush()
         print ""
 
-    def __update_mini_batch__(self, mini_batch, eta):
-        """Update the network's weights and biases by applying
-        gradient descent using backpropagation to a single mini batch.
-        The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
-        is the learning rate."""
+    def __update_mini_batch_old__(self, mini_batch, eta):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
@@ -94,11 +104,50 @@ class Network(object):
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)]
 
+    def __update_mini_batch__(self, mini_batch, eta):
+        """Update the network's weights and biases by applying
+        gradient descent using backpropagation to a single mini batch.
+        The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
+        is the learning rate."""
+
+        batch_size = len(mini_batch)
+
+        # transform to (input x batch_size) matrix
+        x = np.asarray([_x.ravel() for _x, _y in mini_batch]).transpose()
+        # transform to (output x batch_size) matrix
+        y = np.asarray([_y.ravel() for _x, _y in mini_batch]).transpose()
+
+        nabla_b, nabla_w = self.__backpropagation__(x, y)
+        self.weights = [w - (eta / batch_size) * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (eta / batch_size) * nb for b, nb in zip(self.biases, nabla_b)]
+        return
+
     def __backpropagation__(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
         gradient for the cost function C_x.  ``nabla_b`` and
         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
         to ``self.biases`` and ``self.weights``."""
+
+        nabla_b = [0 for i in self.biases]
+        nabla_w = [0 for i in self.weights]
+
+        # feedforward
+        zs, activations = self.__feedforward2__(x)
+
+        # backward pass
+        delta = self.__cost_derivative__(activations[-1], y) * sigmoid_prime(zs[-1])
+        nabla_b[-1] = delta.sum(1).reshape([len(delta), 1]) # reshape to (n x 1) matrix
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+
+        for l in xrange(2, self.num_layers):
+            z = zs[-l]
+            sp = sigmoid_prime(z)
+            delta = np.dot(self.weights[-l + 1].transpose(), delta) * sp
+            nabla_b[-l] = delta.sum(1).reshape([len(delta), 1]) # reshape to (n x 1) matrix
+            nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
+        return (nabla_b, nabla_w)
+
+    def __backpropagation_old__(self, x, y):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         # feedforward
@@ -135,7 +184,7 @@ class Network(object):
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
 
-        test_results = [(np.argmax(self.feedforward(x)), y)
+        test_results = [(np.argmax(self.__feedforward__(x)), y)
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
    

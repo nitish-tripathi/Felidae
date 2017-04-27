@@ -14,6 +14,40 @@ import cPickle
 # Third-party libraries
 import numpy as np
 
+class QuadraticCost(object):
+    @staticmethod
+    def fn(a, y):
+        """Return the cost associated with an output ``a`` and desired output
+        ``y``.
+        """
+        return 0.5*np.linalg.norm(a-y)**2
+
+    @staticmethod
+    def delta(z, a, y):
+        """Return the error delta from the output layer."""
+        return (a-y) * sigmoid_prime(z)
+
+class CrossEntropyCost(object):
+    @staticmethod
+    def fn(a, y):
+        """Return the cost associated with an output ``a`` and desired output ``y``.  
+        Note that np.nan_to_num is used to ensure numerical
+        stability.  In particular, if both ``a`` and ``y`` have a 1.0
+        in the same slot, then the expression (1-y)*np.log(1-a)
+        returns nan.  The np.nan_to_num ensures that that is converted
+        to the correct value (0.0).
+        """
+        return np.sum(np.nan_to_num(-y*np.log(a)-(1-y)*np.log(1-a)))
+    
+    @staticmethod
+    def delta(z, a, y):
+        """Return the error delta from the output layer.  
+        Note that theparameter ``z`` is not used by the method.  It is included in
+        the method's parameters in order to make the interface
+        consistent with the delta method for other cost classes.
+        """
+        return (a-y)
+
 class Network(object):
 
     def __init__(self, sizes):
@@ -32,6 +66,7 @@ class Network(object):
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
+        self.cost = CrossEntropyCost
 
     def __feedforward__(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -135,7 +170,8 @@ class Network(object):
         zs, activations = self.__feedforward2__(x)
 
         # backward pass
-        delta = self.__cost_derivative__(activations[-1], y) * sigmoid_prime(zs[-1])
+        delta = self.cost.delta(zs[-1], activations[-1], y)
+        #delta = self.__cost_derivative__(activations[-1], y) * sigmoid_prime(zs[-1])
         nabla_b[-1] = delta.sum(1).reshape([len(delta), 1]) # reshape to (n x 1) matrix
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
 
@@ -192,7 +228,7 @@ class Network(object):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
         return (output_activations-y)
-    
+
     def save(self, filename="model"):
         """ Method to save the trained model"""
         f = open(filename, 'wb')

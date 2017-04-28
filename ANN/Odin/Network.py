@@ -50,7 +50,7 @@ class CrossEntropyCost(object):
 
 class Network(object):
 
-    def __init__(self, sizes, cost=CrossEntropyCost):
+    def __init__(self, sizes, eta, C=0.0, cost=CrossEntropyCost):
         """
         Initializes artificial neural network classifier.
         
@@ -69,16 +69,22 @@ class Network(object):
             would be a three-layer network, with the first layer containing 
             2 neurons, the second layer 3 neurons, and the third layer 1 neuron.
         
+        eta: float
+            Learning rate
+        
         cost: Cost class
             Defines the cost calculation class, either CrossEntropyCost or
             Quadratic cost
         """
-
+        np.random.seed()
         self._num_layers = len(sizes)
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(y, x)
+        self.weights = [np.random.randn(y, x)/np.sqrt(x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
+        self._C = C
+        self._eta = eta
         self.cost = cost
+        self.test_cost = []
 
     def _feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -96,11 +102,11 @@ class Network(object):
             zs.append(z)
             activation = sigmoid(z)
             activations.append(activation)
-
+        
         return (zs, activations)
 
-    def fit(self, training_data, epochs, mini_batch_size, eta,
-            test_data=None):
+    def fit(self, training_data, epochs, mini_batch_size,
+            test_data=None, calc_test_cost=False):
         """
         Fit the model to the training data.
         
@@ -119,9 +125,6 @@ class Network(object):
             Compute gradient against more than one training example at
             each step.
         
-        eta: float
-            Learning rate
-        
         test_data: list of tuples (X, y)
             If provided then the network will be evaluated against the 
             test data after each epoch, and partial progress printed out.
@@ -132,6 +135,8 @@ class Network(object):
 
         if test_data: n_test = len(test_data)
         n = len(training_data)
+
+        self._nOut = training_data[0][1].shape[0]
 
         for j in xrange(epochs):
 
@@ -146,30 +151,35 @@ class Network(object):
             # Then for each mini_batch we apply a single step of gradient descent
             for mini_batch in mini_batches:
                 #self._update_mini_batch_old(mini_batch, eta)
-                self._update_mini_batch(mini_batch, eta)
+                self._update_mini_batch(mini_batch, n)
             
             if test_data:
                 print "Epoch {0}: {1} / {2}".format(
-                    j, self.evaluate(test_data), n_test)
+                    j, self.evaluate(test_data), n_test, self._total_cost(test_data, True))
+                
+                if calc_test_cost == True:
+                    cost = self._total_cost(test_data, True)
+                    self.test_cost.append(cost)
             else:
                 #print "Epoch {0} complete".format(j)
                 sys.stderr.write('\rEpoch: %d/%d' % (j+1, epochs))
                 sys.stderr.flush()
+                
         print ""
 
-    def _update_mini_batch_old(self, mini_batch, eta):
+    def _update_mini_batch_old(self, mini_batch):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self._backpropagation(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w-(eta/len(mini_batch))*nw
+        self.weights = [w-(self._eta/len(mini_batch))*nw
                         for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(eta/len(mini_batch))*nb
+        self.biases = [b-(self._eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)]
 
-    def _update_mini_batch(self, mini_batch, eta):
+    def _update_mini_batch(self, mini_batch, n):
         """Update the network's weights and biases by applying
         gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
@@ -183,8 +193,8 @@ class Network(object):
         y = np.asarray([_y.ravel() for _x, _y in mini_batch]).transpose()
 
         nabla_b, nabla_w = self._backpropagation(x, y)
-        self.weights = [w - (eta / batch_size) * nw for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b - (eta / batch_size) * nb for b, nb in zip(self.biases, nabla_b)]
+        self.weights = [(1-self._eta*(self._C/n))*w - (self._eta / batch_size) * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (self._eta / batch_size) * nb for b, nb in zip(self.biases, nabla_b)]
         return
 
     def _backpropagation(self, x, y):
@@ -267,6 +277,37 @@ class Network(object):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
         return (output_activations-y)
+    
+    def _total_cost(self, data, convert=False):
+        """Return the total cost for the data set ``data``.  The flag
+        ``convert`` should be set to False if the data set is the
+        training data (the usual case), and to True if the data set is
+        the validation or test data.  See comments on the similar (but
+        reversed) convention for the ``accuracy`` method, above.
+        """
+        cost = 0.0
+        
+        for x, y in data:
+            a = self._feedforward(x)
+            if convert: y = self._vectorized_result(y)
+            cost += self.cost.fn(a, y)/len(data)
+        
+        cost += 0.5*(self._C/len(data))*sum(
+            np.linalg.norm(w)**2 for w in self.weights)
+
+        return cost
+    
+    def _vectorized_result(self, j):
+        """Return a 10-dimensional unit vector with a 1.0 in the j'th position
+        and zeroes elsewhere.  This is used to convert a digit (0...9)
+        into a corresponding desired output from the neural network.
+        """
+        if j <= self._nOut:
+            e = np.zeros((self._nOut, 1))
+            e[j] = 1.0
+            return e
+        else:
+            return j
 
     def save(self, filename="model"):
         """ Method to save the trained model"""

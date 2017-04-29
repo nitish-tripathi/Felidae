@@ -108,7 +108,7 @@ def main():
         X, y = make_moons(200, noise=0.2)
         filename = "make_moons.model"
     elif type_data == '2':
-        X, y = make_circles(300, shuffle=True, noise=0.2, factor=0.5)
+        X, y = make_circles(200, shuffle=True, noise=0.2, factor=0.5)
         filename = "make_circles.model"
     else:
         print "Wrong type"

@@ -9,7 +9,7 @@ http://numericinsight.com/uploads/A_Gentle_Introduction_to_Backpropagation.pdf
 # Standard library
 import sys
 import random
-import cPickle
+import json
 
 # Third-party libraries
 import numpy as np
@@ -50,7 +50,7 @@ class CrossEntropyCost(object):
 
 class Network(object):
 
-    def __init__(self, sizes, eta, C=0.0, cost=CrossEntropyCost):
+    def __init__(self, model=None, sizes=None, eta=None, C=0.0, cost=CrossEntropyCost):
         """
         Initializes artificial neural network classifier.
         
@@ -72,11 +72,25 @@ class Network(object):
         eta: float
             Learning rate
         
+        C: float
+            L2 parameterization. It is used to not allow the weights to become larger,
+            in order to avoid overfitting
+        
         cost: Cost class
             Defines the cost calculation class, either CrossEntropyCost or
             Quadratic cost
         """
+
+        if model != None:
+            self.load(model)
+            return
+
+        elif sizes == None:
+            raise NotImplementedError('Parameter sizes cannot be None')
+            return
+        
         np.random.seed()
+        self.sizes = sizes
         self._num_layers = len(sizes)
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)/np.sqrt(x)
@@ -309,11 +323,36 @@ class Network(object):
         else:
             return j
 
-    def save(self, filename="model"):
-        """ Method to save the trained model"""
-        f = open(filename, 'wb')
-        cPickle.dump(self, f, protocol=-1)
+    def save(self, filename='model'):
+        """
+        Save the neural network to the file ``filename``.
+        """
+        
+        data = {"sizes": self.sizes,
+                "weights": [w.tolist() for w in self.weights],
+                "biases": [b.tolist() for b in self.biases],
+                "cost": str(self.cost.__name__),
+                "eta": self._eta,
+                "C": self._C}
+        
+        f = open(filename, "w")
+        json.dump(data, f)
         f.close()
+    
+    def load(self, filename):
+        """
+        Load a neural network from the file ``filename``. 
+        Returns an instance of Network.
+        """
+        f = open(filename, "r")
+        data = json.load(f)
+        f.close()
+        self.cost = getattr(sys.modules[__name__], data["cost"])
+        self.sizes = data["sizes"]
+        self.weights = [np.array(w) for w in data["weights"]]
+        self.biases = [np.array(b) for b in data["biases"]]
+        self._eta = data["eta"]
+        self._C = data["C"]
 
 #### Miscellaneous functions
 def sigmoid(z):

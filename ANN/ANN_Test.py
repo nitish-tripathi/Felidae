@@ -32,7 +32,7 @@ def main():
     # Test data does not have result should not be one-hot-encoded
     test_data = zip(training_inputs, y)
 
-    net = Network.Network(sizes=[2,4,2], eta=0.1, C=3)
+    net = Network.Network(sizes=[2,4,2], eta=0.1, C=3, decrease_const = 0.00001)
     net.fit(training_data, 300, 1, test_data=test_data, calc_test_cost=True)
     net.save("test.model")
     print "Result: {0}/{1}".format(net.evaluate(test_data), len(test_data))

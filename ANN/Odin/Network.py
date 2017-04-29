@@ -50,7 +50,7 @@ class CrossEntropyCost(object):
 
 class Network(object):
 
-    def __init__(self, model=None, sizes=None, eta=None, C=0.0, cost=CrossEntropyCost):
+    def __init__(self, model = None, sizes = None, eta = None, C = 0.0, cost = CrossEntropyCost, decrease_const = 0.0):
         """
         Initializes artificial neural network classifier.
         
@@ -79,6 +79,11 @@ class Network(object):
         cost: Cost class
             Defines the cost calculation class, either CrossEntropyCost or
             Quadratic cost
+        
+        decrease_const : float (default: 0.0)
+            Decrease constant. Shrinks the learning rate
+            after each epoch via eta / (1 + epoch*decrease_const)
+        
         """
 
         if model != None:
@@ -97,6 +102,7 @@ class Network(object):
                         for x, y in zip(sizes[:-1], sizes[1:])]
         self._C = C
         self._eta = eta
+        self._decrease_const = decrease_const
         self.cost = cost
         self.test_cost = []
 
@@ -119,7 +125,7 @@ class Network(object):
         
         return (zs, activations)
 
-    def fit(self, training_data, epochs, mini_batch_size,
+    def fit(self, training_data, epochs, mini_batch_size=1,
             test_data=None, calc_test_cost=False):
         """
         Fit the model to the training data.
@@ -135,9 +141,9 @@ class Network(object):
         epoch: int
             Maximum number of iterations over the training dataset.
         
-        mini_batch_size: int
-            Compute gradient against more than one training example at
-            each step.
+        mini_batch_size: int (default: 1)
+           Divides training data into k minibatches for efficiency.
+           Normal gradient descent learning if k=1 (default).
         
         test_data: list of tuples (X, y)
             If provided then the network will be evaluated against the 
@@ -153,6 +159,9 @@ class Network(object):
         self._nOut = training_data[0][1].shape[0]
 
         for j in xrange(epochs):
+            
+            # Adaptive learning rate
+            self._eta /= (1 + self._decrease_const*j)
 
             # Randomly shuffling training data
             random.shuffle(training_data)

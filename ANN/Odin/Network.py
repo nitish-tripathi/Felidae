@@ -14,39 +14,9 @@ import json
 # Third-party libraries
 import numpy as np
 
-class QuadraticCost(object):
-    @staticmethod
-    def fn(a, y):
-        """Return the cost associated with an output ``a`` and desired output
-        ``y``.
-        """
-        return 0.5*np.linalg.norm(a-y)**2
-
-    @staticmethod
-    def delta(z, a, y):
-        """Return the error delta from the output layer."""
-        return (a-y) * sigmoid_prime(z)
-
-class CrossEntropyCost(object):
-    @staticmethod
-    def fn(a, y):
-        """Return the cost associated with an output ``a`` and desired output ``y``.  
-        Note that np.nan_to_num is used to ensure numerical
-        stability.  In particular, if both ``a`` and ``y`` have a 1.0
-        in the same slot, then the expression (1-y)*np.log(1-a)
-        returns nan.  The np.nan_to_num ensures that that is converted
-        to the correct value (0.0).
-        """
-        return np.sum(np.nan_to_num(-y*np.log(a)-(1-y)*np.log(1-a)))
-    
-    @staticmethod
-    def delta(z, a, y):
-        """Return the error delta from the output layer.  
-        Note that theparameter ``z`` is not used by the method.  It is included in
-        the method's parameters in order to make the interface
-        consistent with the delta method for other cost classes.
-        """
-        return (a-y)
+# Import inside Odin
+from Cost import QuadraticCost, CrossEntropyCost
+from Helpers import Helpers
 
 class Network(object):
 
@@ -109,7 +79,7 @@ class Network(object):
     def _feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(w, a)+b)
+            a = Helpers.sigmoid(np.dot(w, a)+b)
         return a
     
     def _feedforward2(self, a):
@@ -120,7 +90,7 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation) + b
             zs.append(z)
-            activation = sigmoid(z)
+            activation = Helpers.sigmoid(z)
             activations.append(activation)
         
         return (zs, activations)
@@ -234,13 +204,13 @@ class Network(object):
 
         # backward pass
         delta = self.cost.delta(zs[-1], activations[-1], y)
-        #delta = self._cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
+        #delta = self._cost_derivative(activations[-1], y) * Helpers.sigmoid_prime(zs[-1])
         nabla_b[-1] = delta.sum(1).reshape([len(delta), 1]) # reshape to (n x 1) matrix
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
 
         for l in xrange(2, self._num_layers):
             z = zs[-l]
-            sp = sigmoid_prime(z)
+            sp = Helpers.sigmoid_prime(z)
             delta = np.dot(self.weights[-l + 1].transpose(), delta) * sp
             nabla_b[-l] = delta.sum(1).reshape([len(delta), 1]) # reshape to (n x 1) matrix
             nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
@@ -256,11 +226,11 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
-            activation = sigmoid(z)
+            activation = Helpers.sigmoid(z)
             activations.append(activation)
         # backward pass
         delta = self._cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
+            Helpers.sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note that the variable l in the loop below is used a little
@@ -271,7 +241,7 @@ class Network(object):
         # that Python can use negative indices in lists.
         for l in xrange(2, self._num_layers):
             z = zs[-l]
-            sp = sigmoid_prime(z)
+            sp = Helpers.sigmoid_prime(z)
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
@@ -362,12 +332,3 @@ class Network(object):
         self.biases = [np.array(b) for b in data["biases"]]
         self._eta = data["eta"]
         self._C = data["C"]
-
-#### Miscellaneous functions
-def sigmoid(z):
-    """The sigmoid function."""
-    return 1.0/(1.0+np.exp(-z))
-
-def sigmoid_prime(z):
-    """Derivative of the sigmoid function."""
-    return sigmoid(z)*(1-sigmoid(z))

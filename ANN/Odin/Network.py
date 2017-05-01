@@ -3,6 +3,7 @@
 http://neuralnetworksanddeeplearning.com/chap1.html#implementing_our_network_to_classify_digits
 http://neuralnetworksanddeeplearning.com/chap2.html
 http://numericinsight.com/uploads/A_Gentle_Introduction_to_Backpropagation.pdf
+https://ayearofai.com/rohan-lenny-1-neural-networks-the-backpropagation-algorithm-explained-abf4609d4f9d
 """
 
 #### Libraries

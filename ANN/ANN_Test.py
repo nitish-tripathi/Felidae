@@ -9,7 +9,7 @@ from Odin import Network, MNIST_Loader
 def main():
     """ Main """
     start_time = time.time()
-    
+    """
     training_data, validation_data, test_data = MNIST_Loader.load_data_wrapper()
     #xxx = training_data[0]
     net = Network.Network(sizes=[784, 100, 10], eta=0.5, C=5)
@@ -49,7 +49,6 @@ def main():
 
     #net = Network.Network(model='test.model')
     #print "Result: {0}/{1}".format(net.evaluate(test_data), len(test_data))
-    """
 
 def one_hot_encoder(data):
     create_entry = lambda x : [1, 0] if x == 0 else [0, 1]

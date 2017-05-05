@@ -29,6 +29,7 @@ def simple_neuron(x_in, target_in, num_input):
 def main():
     """ Main """
     #simple_neuron(np.asarray([1.0, 1.0], dtype='float32'), 20, 2)
+
     shared_var = shared(np.array([[0.1, 2],[3, 4]], dtype='float32'))
     x = T.fscalar('x')
     y = x + 2

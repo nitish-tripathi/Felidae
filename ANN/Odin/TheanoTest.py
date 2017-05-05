@@ -1,6 +1,7 @@
 
 import numpy as np
 import theano.tensor as T
+import theano
 from theano import function
 from theano import shared
 
@@ -25,10 +26,19 @@ def simple_neuron(x_in, target_in, num_input):
         output = train(x_in, target_in)
         print output
 
-
 def main():
     """ Main """
-    simple_neuron(np.asarray([1.0, 1.0], dtype='float32'), 20, 2)
+    #simple_neuron(np.asarray([1.0, 1.0], dtype='float32'), 20, 2)
+    shared_var = shared(np.array([[0.1, 2],[3, 4]], dtype='float32'))
+    x = T.fscalar('x')
+    y = x + 2
+    updates = [(shared_var, shared_var**2)]
+    f1 = function([x], y, updates={shared_var: shared_var * 2})
+    print f1(1)
+    print shared_var.get_value()
+    
+    print(theano.config.device)
+    print(theano.config.floatX)
 
 if __name__ == "__main__":
     main()

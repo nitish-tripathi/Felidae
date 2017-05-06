@@ -3,7 +3,6 @@
 # Standard library
 import sys
 import random
-import json
 
 # Third-party libraries
 import numpy as np

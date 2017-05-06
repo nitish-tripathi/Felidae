@@ -5,9 +5,8 @@ import theano
 from theano import function
 from theano import shared
 
-from Layers.ConvolutionPoolLayer import ConvolutionPoolLayer
-from Layers.FullyConnectedLayer import FullyConnectedLayer
-from Layers.SoftmaxLayer import SoftmaxLayer
+import Network
+from Layers import ConvolutionPoolLayer, FullyConnectedLayer, SoftmaxLayer
 
 def simple_neuron(x_in, target_in, num_input):
     x = T.fvector('x')
@@ -34,6 +33,17 @@ def main():
     """ Main """
     #simple_neuron(np.asarray([1.0, 1.0], dtype='float32'), 20, 2)
 
+    net = Network.Network([
+          FullyConnectedLayer.FullyConnectedLayer(n_in=784, n_out=100),
+          SoftmaxLayer.SoftmaxLayer(n_in=100, n_out=10)],
+          mini_batch_size=10)
+
+    #net = ConvolutionPoolLayer.ConvolutionPoolLayer(filter_shape=(2,1,5,5), image_shape=(10, 1, 28, 28), poolsize=(2,2))
+    #net = SoftmaxLayer.SoftmaxLayer(100, 10)
+    #print net.w.get_value().shape
+    #print net.b.get_value().shape
+
+    """
     shared_var = shared(np.array([[0.1, 2],[3, 4]], dtype='float32'))
     x = T.fscalar('x')
     y = x + 2
@@ -44,6 +54,6 @@ def main():
     
     print(theano.config.device)
     print(theano.config.floatX)
-
+    """
 if __name__ == "__main__":
     main()

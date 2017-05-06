@@ -7,7 +7,6 @@ http://neuralnetworksanddeeplearning.com/chap6.html
 # Standard library
 import sys
 import random
-import json
 
 # Third-party libraries
 import numpy as np
@@ -32,7 +31,7 @@ class FullyConnectedLayer(object):
         self.b = theano.shared(np.asarray(np.ones((n_out,)), dtype=theano.config.floatX),
                                 name='b', borrow=True)
         
-        self.param = [self.w, self.b]
+        self.params = [self.w, self.b]
     
     def _set_input(self, _input, mini_batch_size):
         self._input = _input.reshape((mini_batch_size, self.n_in))

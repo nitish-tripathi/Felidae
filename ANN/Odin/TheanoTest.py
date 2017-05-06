@@ -38,6 +38,17 @@ def main():
           SoftmaxLayer.SoftmaxLayer(n_in=100, n_out=10)],
           mini_batch_size=10)
 
+    net = Network.Network([
+        ConvolutionPoolLayer.ConvolutionPoolLayer(image_shape=(10, 1, 28, 28), 
+                      filter_shape=(20, 1, 5, 5), 
+                      poolsize=(2, 2)),
+        ConvolutionPoolLayer.ConvolutionPoolLayer(image_shape=(10, 20, 12, 12), 
+                      filter_shape=(40, 20, 5, 5), 
+                      poolsize=(2, 2)),
+        FullyConnectedLayer.FullyConnectedLayer(n_in=784, n_out=100),
+        SoftmaxLayer.SoftmaxLayer(n_in=100, n_out=10)],
+        mini_batch_size=10)
+
     #net = ConvolutionPoolLayer.ConvolutionPoolLayer(filter_shape=(2,1,5,5), image_shape=(10, 1, 28, 28), poolsize=(2,2))
     #net = SoftmaxLayer.SoftmaxLayer(100, 10)
     #print net.w.get_value().shape

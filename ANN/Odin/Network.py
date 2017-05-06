@@ -22,5 +22,13 @@ class Network(object):
         self.params = [param for layer in self.layers for param in layer.params]
         self.x = T.matrix('x')
         self.y = T.ivector('y')
-        self.init_layer = self.layers[0]
+
+        init_layer = self.layers[0]
+        init_layer._set_input(self.x, mini_batch_size)
+
+        for j in xrange(1, len(self.layers)):
+            prev_layer, layer  = self.layers[j-1], self.layers[j]
+            layer._set_input(prev_layer._output, self.mini_batch_size)
+        
+        self._output = self.layers[-1]._output
     

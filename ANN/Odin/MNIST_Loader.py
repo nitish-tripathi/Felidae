@@ -15,6 +15,19 @@ import gzip
 
 # Third-party libraries
 import numpy as np
+import theano
+
+def load_data_shared():
+    f = gzip.open('mnist.pkl.gz', 'rb')
+    training_data, validation_data, test_data = cPickle.load(f)
+    f.close()
+
+    def shared(data):
+        shared_x = theano.shared(np.asarray(data[0], dtype=theano.config.floatX), borrow=True)
+        shared_y = theano.shared(np.asarray(data[1], dtype=theano.config.floatX), borrow=True)
+        return shared_x, theano.tensor.cast(shared_y, "int32")
+    
+    return [shared(training_data), shared(validation_data, shared(test_data))]
 
 def load_data():
     """Return the MNIST data as a tuple containing the training data,

@@ -11,6 +11,7 @@ import random
 # Third-party libraries
 import numpy as np
 import theano
+import theano.tensor.signal.pool
 import theano.tensor as T
 
 class ConvolutionPoolLayer(object):
@@ -57,6 +58,6 @@ class ConvolutionPoolLayer(object):
         conv_out = T.nnet.conv.conv2d(
                    input=self._input, filters=self.w, filter_shape=self.filter_shape,
                    image_shape=self.image_shape)
-        pooled_out = T.signal.downsample.max_pool_2d(
+        pooled_out = theano.tensor.signal.pool.pool_2d(
                      input=conv_out, ws=self.poolsize, ignore_border=True)
-        self.output = self.activation_fn(pooled_out + self.b.dimshuffle('x', 0, 'x', 'x'))
+        self._output = self.activation_fn(pooled_out + self.b.dimshuffle('x', 0, 'x', 'x'))

@@ -59,6 +59,5 @@ class ConvolutionPoolLayer(object):
                    input=self._input, filters=self.w, filter_shape=self.filter_shape,
                    image_shape=self.image_shape)
         pooled_out = T.signal.downsample.max_pool_2d(
-                     input=conv_out, ds=self.poolsize, ignore_border=True)
+                     input=conv_out, ws=self.poolsize, ignore_border=True)
         self.output = self.activation_fn(pooled_out + self.b.dimshuffle('x', 0, 'x', 'x'))
-

@@ -5,6 +5,10 @@ import theano
 from theano import function
 from theano import shared
 
+from Layers.ConvolutionPoolLayer import ConvolutionPoolLayer
+from Layers.FullyConnectedLayer import FullyConnectedLayer
+from Layers.SoftmaxLayer import SoftmaxLayer
+
 def simple_neuron(x_in, target_in, num_input):
     x = T.fvector('x')
     target = T.fscalar('target')

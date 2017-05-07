@@ -19,7 +19,7 @@ import numpy as np
 from Cost import QuadraticCost, CrossEntropyCost
 from Helpers import Helpers
 
-class BasicNetwork(object):
+class Network(object):
 
     def __init__(self, model = None, sizes = None, eta = None, C = 0.0, cost = CrossEntropyCost, decrease_const = 0.0):
         """

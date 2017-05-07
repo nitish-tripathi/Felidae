@@ -1,10 +1,12 @@
 
+# 3rd party libraries
 import numpy as np
 import theano.tensor as T
 import theano
 from theano import function
 from theano import shared
 
+# Odin library classes
 import Network
 import MNIST_Loader
 from Layers import ConvolutionPoolLayer, FullyConnectedLayer, SoftmaxLayer
@@ -34,7 +36,7 @@ def main():
     """ Main """
     #simple_neuron(np.asarray([1.0, 1.0], dtype='float32'), 20, 2)
 
-    training_data, validation_data, test_data = MNIST_Loader.load_data_shared("/Users/nitish/Documents/Python/Machine Learning/ANN/mnist.pkl.gz")
+    training_data, validation_data, test_data = MNIST_Loader.load_data_shared("Datasets/mnist.pkl.gz")
     net = Network.Network([
           ConvolutionPoolLayer.ConvolutionPoolLayer(filter_shape=(20, 1, 5, 5), image_shape=(10, 1, 28, 28), poolsize=(2,2)),
           FullyConnectedLayer.FullyConnectedLayer(n_in=20*12*12, n_out=100),
@@ -42,22 +44,5 @@ def main():
           mini_batch_size=10)
     net.fit(training_data, 60, mini_batch_size=10, eta=0.1, test_data=test_data, validation_data=validation_data)
 
-    #net = ConvolutionPoolLayer.ConvolutionPoolLayer(filter_shape=(2,1,5,5), image_shape=(10, 1, 28, 28), poolsize=(2,2))
-    #net = SoftmaxLayer.SoftmaxLayer(100, 10)
-    #print net.w.get_value().shape
-    #print net.b.get_value().shape
-
-    """
-    shared_var = shared(np.array([[0.1, 2],[3, 4]], dtype='float32'))
-    x = T.fscalar('x')
-    y = x + 2
-    updates = [(shared_var, shared_var**2)]
-    f1 = function([x], y, updates={shared_var: shared_var * 2})
-    print f1(1)
-    print shared_var.get_value()
-    
-    print(theano.config.device)
-    print(theano.config.floatX)
-    """
 if __name__ == "__main__":
     main()

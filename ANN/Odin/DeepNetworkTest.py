@@ -1,10 +1,13 @@
 
 # 3rd party libraries
 import numpy as np
-import theano.tensor as T
+
 import theano
+import theano.tensor as T
 from theano import function
 from theano import shared
+
+import matplotlib.pyplot as plt
 
 # Odin library classes
 import Network
@@ -38,11 +41,11 @@ def main():
 
     training_data, validation_data, test_data = MNIST_Loader.load_data_shared("Datasets/mnist.pkl.gz")
     net = Network.Network([
-          ConvolutionPoolLayer.ConvolutionPoolLayer(filter_shape=(20, 1, 5, 5), image_shape=(10, 1, 28, 28), poolsize=(2,2)),
-          FullyConnectedLayer.FullyConnectedLayer(n_in=20*12*12, n_out=100),
+          #ConvolutionPoolLayer.ConvolutionPoolLayer(filter_shape=(20, 1, 5, 5), image_shape=(10, 1, 28, 28), poolsize=(2,2)),
+          FullyConnectedLayer.FullyConnectedLayer(n_in=784, n_out=100),
           SoftmaxLayer.SoftmaxLayer(n_in=100, n_out=10)],
           mini_batch_size=10)
-    net.fit(training_data, 60, mini_batch_size=10, eta=0.1, test_data=test_data, validation_data=validation_data)
+    net.fit(training_data, 3, mini_batch_size=10, eta=0.1, test_data=test_data, validation_data=validation_data)
 
 if __name__ == "__main__":
     main()

@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_moons, make_circles
 
-from Odin import MNIST_Loader
-from Odin.Previous_Versions.Odin_10 import Network
+from Previous_Versions.Odin_10 import Network
+import MNIST_Loader
 
 def main():
     """ Main """

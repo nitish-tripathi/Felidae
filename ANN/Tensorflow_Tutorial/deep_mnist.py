@@ -1,9 +1,11 @@
 
 import sys
+import os.path
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import matplotlib.pyplot as plt
+import pylab
 
 __mnist__ = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
@@ -25,6 +27,7 @@ def max_pool_2x2(x):
 def main():
     """ Main """
     one_conv_deep_mnist()
+    #simple_mnist()
 
 def one_conv_deep_mnist():
     x = tf.placeholder(dtype=tf.float32, shape=[None, 784])
@@ -64,21 +67,41 @@ def one_conv_deep_mnist():
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
 
-    costs = []
-    for i in range(10000):
-        batch = __mnist__.train.next_batch(100)
+    saver = tf.train.Saver()
+    file_path = "deep_model/test.model"
+
+    if os.path.isfile(file_path+".meta"):
+        # Restore model
+        saver.restore(sess, file_path)
+    else:
+        costs = []
+        for i in range(10000):
+            batch = __mnist__.train.next_batch(100)
+            
+            if i%100 == 0:
+                train_accuracy = sess.run(calculate_accuracy, feed_dict={x: batch[0], _y: batch[1]})
+                print "\nTrain accuracy: {0}".format(train_accuracy)
+            
+            _, temp_cost = sess.run([train_fn, cross_entropy], feed_dict={x: batch[0], _y: batch[1]})
+            costs.append(temp_cost)
+            sys.stderr.write('\rEpoch: %d/%d' % (i+1, 7000))
+            sys.stderr.flush()
         
-        if i%100 == 0:
-            train_accuracy = sess.run(calculate_accuracy, feed_dict={x: batch[0], _y: batch[1]})
-            print "\nTrain accuracy: {0}".format(train_accuracy)
-        
-        _, temp_cost = sess.run([train_fn, cross_entropy], feed_dict={x: batch[0], _y: batch[1]})
-        costs.append(temp_cost)
-        sys.stderr.write('\rEpoch: %d/%d' % (i+1, 20000))
-        sys.stderr.flush()
+        # Save model
+        save_path = saver.save(sess, file_path)
+        print "\nSaved at {0}".format(save_path)
     
+    #x1 = __mnist__.train.images[0].reshape(1,784)
+    #y1 = __mnist__.train.labels[0].reshape(1,10)
+
+    #test_accuracy = sess.run(calculate_accuracy, feed_dict={x: x1, _y: y1})
     test_accuracy = sess.run(calculate_accuracy, feed_dict={x: __mnist__.test.images, _y: __mnist__.test.labels})
+
     print "\nTest accuracy: {0}".format(test_accuracy)
+   
+    #print "\nLabel: {0}".format(np.argmax(y1)) 
+    #pylab.imshow(x1.reshape(28,28))
+    #pylab.show()
 
 def simple_mnist():
     x = tf.placeholder(dtype=tf.float32, shape=[None, 784])
@@ -94,16 +117,26 @@ def simple_mnist():
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
 
-    costs = []
-    for _ in range(1000):
-        batch_xs, batch_ys = __mnist__.train.next_batch(100)
-        _, temp_cost = sess.run([train_fn, cost], feed_dict={x: batch_xs, y_: batch_ys})
-        costs.append(temp_cost)
-    
+    # Add an op to save and restore model
+    saver = tf.train.Saver()
+    file_path = "tmp/test.model"
+
+    if os.path.isfile(file_path+".meta"):
+        saver.restore(sess, file_path)
+    else:
+        costs = []
+        for _ in range(2000):
+            batch_xs, batch_ys = __mnist__.train.next_batch(100)
+            _, temp_cost = sess.run([train_fn, cost], feed_dict={x: batch_xs, y_: batch_ys})
+            costs.append(temp_cost)
+        
+        save_path = saver.save(sess, file_path)
+        print "Saved at {0}".format(save_path)
+
     result = tf.equal(tf.argmax(y, axis=1), tf.argmax(y_, axis=1))
     calculate_accuracy = tf.reduce_mean(tf.cast(result, tf.float32))
 
-    accuracy = sess.run(calculate_accuracy, feed_dict={x: __mnist__.test.images, y_: __mnist__.test.labels})
+    accuracy = sess.run(calculate_accuracy, feed_dict={x: __mnist__.train.images, y_: __mnist__.train.labels})
     print accuracy
 
     #plt.plot(costs, '-')

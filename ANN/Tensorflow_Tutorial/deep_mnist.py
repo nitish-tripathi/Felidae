@@ -1,4 +1,5 @@
 
+import sys
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
@@ -23,9 +24,9 @@ def max_pool_2x2(x):
 
 def main():
     """ Main """
-    deep_mnist()
+    one_conv_deep_mnist()
 
-def deep_mnist():
+def one_conv_deep_mnist():
     x = tf.placeholder(dtype=tf.float32, shape=[None, 784])
     _y = tf.placeholder(dtype=tf.float32, shape=[None, 10])
 
@@ -55,7 +56,7 @@ def deep_mnist():
     y_conv = tf.nn.relu(tf.matmul(h_fc1, W_softmax) + b_softmax)
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=_y, logits=y_conv))
-    train_fn = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
+    train_fn = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
     
     result = tf.equal(tf.argmax(_y, axis=1), tf.argmax(y_conv, axis=1))
     calculate_accuracy = tf.reduce_mean(tf.cast(result, tf.float32))
@@ -64,21 +65,20 @@ def deep_mnist():
     tf.global_variables_initializer().run()
 
     costs = []
-    for i in range(20000):
+    for i in range(10000):
         batch = __mnist__.train.next_batch(100)
         
         if i%100 == 0:
             train_accuracy = sess.run(calculate_accuracy, feed_dict={x: batch[0], _y: batch[1]})
-            print "Train accuracy: {0}".format(train_accuracy)
+            print "\nTrain accuracy: {0}".format(train_accuracy)
         
         _, temp_cost = sess.run([train_fn, cross_entropy], feed_dict={x: batch[0], _y: batch[1]})
         costs.append(temp_cost)
+        sys.stderr.write('\rEpoch: %d/%d' % (i+1, 20000))
+        sys.stderr.flush()
     
     test_accuracy = sess.run(calculate_accuracy, feed_dict={x: __mnist__.test.images, _y: __mnist__.test.labels})
-    print test_accuracy
-    
-        
-
+    print "\nTest accuracy: {0}".format(test_accuracy)
 
 def simple_mnist():
     x = tf.placeholder(dtype=tf.float32, shape=[None, 784])

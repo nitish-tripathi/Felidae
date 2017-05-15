@@ -5,4 +5,4 @@
 
 According to wikipedia, Learning-By-Doing is a concept by which productivity is achieved through practice, self-perfection and minor innovations. [https://en.wikipedia.org/wiki/Learning-by-doing_(economics)]
 
-This is my attempt to learn deep learning, starting with machine learning. This repository a lot of small and vanilla implementations.
+This is my attempt to learn deep learning, starting with machine learning. This repository contains a lot of small and vanilla implementations.
